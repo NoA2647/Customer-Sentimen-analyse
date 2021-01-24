@@ -1,17 +1,31 @@
-import matplotlib.pyplot as plt
+from bokeh.io import output_file, show
+from bokeh.plotting import figure
 
 
-def chart(reviews, title):
-    fig = plt.figure()
-    ax = fig.add_axes([0, 0, 1, 1])
+def chart(reviews, status):
+    aspects = []
+    frequencies = []
+    title = ""
 
-    x_dimension = list()
-    y_dimension = list()
+    if status == -1:
+        title = 'Negative Aspects'
+        output_file("negative_aspects.html")
+    if status == 1:
+        title = 'Positive Aspects'
+        output_file("positive_aspects.html")
+
+    reviews = dict(sorted(reviews.items(), key=lambda item: item[1], reverse=True))
 
     for review in reviews:
-        x_dimension.append(review)
-        y_dimension.append(reviews[review])
+        aspects.append(review)
+        frequencies.append(reviews[review])
 
-    ax.set_title(title)
-    ax.bar(x_dimension, y_dimension)
-    plt.show()
+    p = figure(x_range=aspects, plot_height=500, plot_width=len(aspects) * 100,
+               title=title, toolbar_location=None, tools="")
+
+    p.vbar(x=aspects, top=frequencies, width=0.9)
+
+    p.xgrid.grid_line_color = None
+    p.y_range.start = 0
+
+    show(p)

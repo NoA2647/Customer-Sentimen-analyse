@@ -26,16 +26,15 @@ def find_aspects(nouns):
 
 
 def main():
-    df = pd.read_csv("C:/Users/amirh/Desktop/archive/phone_user_review_file_1.csv")
+    df = pd.read_csv("C:/Users/Mehrkish/Desktop/Sentiment Analysis/Dataset/phone_user_review_file_1.csv")
     nlp = spacy.load("en_core_web_sm")
     negative_review = dict()
     positive_review = dict()
     total_rate = 0
 
     for i in range(1000):
+        print(i)
         doc = nlp(df['extract'][i])
-        # doc = nlp("they like phone but i dont")
-        # print(doc)
         nouns = sentiment(doc)
         print(nouns)
         aspects = find_aspects(nouns)
@@ -60,8 +59,8 @@ def main():
     for aspect in negative_review:
         print(aspect, ": {0:.2f}%".format(abs(negative_review[aspect]) * 100 / total_rate))
 
-    chart(positive_review, "positive aspects")
-    chart(positive_review, "negative aspects")
+    chart(positive_review, 1)
+    chart(negative_review, -1)
 
 
 main()
