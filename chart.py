@@ -2,7 +2,7 @@ from bokeh.io import output_file, show
 from bokeh.plotting import figure
 
 
-def chart(reviews, status):
+def chart(reviews, total_rate, status):
     aspects = []
     frequencies = []
     title = ""
@@ -18,7 +18,7 @@ def chart(reviews, status):
 
     for review in reviews:
         aspects.append(review)
-        frequencies.append(abs(reviews[review]))
+        frequencies.append(abs(reviews[review])/total_rate*100)
 
     p = figure(x_range=aspects, plot_height=500, plot_width=len(aspects) * 100,
                title=title, toolbar_location=None, tools="")
