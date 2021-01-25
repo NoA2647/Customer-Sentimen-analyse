@@ -3,60 +3,54 @@ import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from plotly.subplots import make_subplots
 
 
-def beautiful_spider(positive_reviews, negative_reviews, total):
-    seven_top_aspects = []
-    frequencies_positive = []
-    frequencies_negative = []
-
+def beautiful_spider(positive_reviews, negative_reviews):
     negative_reviews = dict(sorted(negative_reviews.items(), key=lambda item: item[1]))
     positive_reviews = dict(sorted(positive_reviews.items(), key=lambda item: item[1], reverse=True))
 
-    four_top_positive_reviews = dict(itertools.islice(positive_reviews.items(), 4))
-    three_top_negative_reviews = dict(itertools.islice(negative_reviews.items(), 3))
+    five_top_positive_reviews = dict(itertools.islice(positive_reviews.items(), 5))
+    five_top_negative_reviews = dict(itertools.islice(negative_reviews.items(), 5))
 
-    print(three_top_negative_reviews)
-    print(four_top_positive_reviews)
+    positive_sum = sum(list(positive_reviews.values()))
+    negative_sum = sum(list(negative_reviews.values()))
 
-    merged_reviews = four_top_positive_reviews.copy()
-    merged_reviews.update(three_top_negative_reviews)
+    five_top_positive_aspects = list(five_top_positive_reviews.keys())
+    five_top_negative_aspects = list(five_top_negative_reviews.keys())
 
-    print(merged_reviews)
+    five_top_positive_frequencies = list(five_top_positive_reviews.values())
+    five_top_negative_frequencies = list(five_top_negative_reviews.values())
 
-    for review in merged_reviews:
-        seven_top_aspects.append(review)
+    five_top_positive_percentages = [(freq / positive_sum) * 100 for freq in five_top_positive_frequencies]
+    five_top_negative_percentages = [(abs(freq) / abs(negative_sum)) * 100 for freq in five_top_negative_frequencies]
 
-    for key in seven_top_aspects:
-        positive_value = positive_reviews.get(key)
-        negative_value = negative_reviews.get(key)
-        if positive_value is None:
-            positive_value = 0
-        if negative_value is None:
-            negative_value = 0
-        frequencies_positive.append(abs(positive_value) / total * 100)
-        frequencies_negative.append(abs(negative_value) / total * 100)
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=("Five Most Frequent Positive Aspects", "Five Most Frequent Negative Aspects"),
+        specs=[[{"type": "polar"}, {"type": "polar"}]]
+    )
 
-    print(frequencies_negative)
-    print(frequencies_positive)
-    print(seven_top_aspects)
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatterpolar(
-        r=frequencies_positive,
-        theta=seven_top_aspects,
+    fig = fig.add_trace(go.Scatterpolar(
+        r=five_top_positive_percentages,
+        theta=five_top_positive_aspects,
         fill='toself',
-        name='Positive'
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=frequencies_negative,
-        theta=seven_top_aspects,
+        name='Positive Aspects'
+    ),
+        row=1, col=1
+    )
+
+    fig = fig.add_trace(go.Scatterpolar(
+        r=[abs(value) for value in five_top_negative_percentages],
+        theta=five_top_negative_aspects,
         fill='toself',
-        name='Negative'
-    ))
+        name='Negative Aspects'
+    ),
+        row=1, col=2
+    )
+
     fig.update_layout(
-        width=650,
+        width=1000,
         height=650,
         polar=dict(
             radialaxis=dict(
@@ -70,11 +64,10 @@ def beautiful_spider(positive_reviews, negative_reviews, total):
     app.layout = html.Div([
         dcc.Graph(figure=fig)
     ], style={
-        'height': '50%',
-        'width': '50%',
+        'height': '75%',
+        'width': '75%',
         "display": "block",
         "margin-left": "auto",
         "margin-right": "auto",
     })
-
-    app.run_server(debug=False, use_reloader=False)
+    app.run_server(debug=False)

@@ -3,6 +3,7 @@ import pandas as pd
 import spacy
 import json
 from chart import chart
+from radar import beautiful_spider
 from sentiment import sentiment
 
 
@@ -34,6 +35,11 @@ def main():
 
     for i in range(1000):
         print(i)
+        lang = df['lang'][i]
+        if lang == 'en':
+            total_rate += 1
+        else:
+            continue
         doc = nlp(df['extract'][i])
         nouns = sentiment(doc)
         print(nouns)
@@ -59,8 +65,6 @@ def main():
     for aspect in negative_review:
         print(aspect, ": {0:.2f}%".format(abs(negative_review[aspect]) * 100 / total_rate))
 
-    chart(positive_review, 1)
-    chart(negative_review, -1)
-
+    beautiful_spider(positive_review, negative_review)
 
 main()
