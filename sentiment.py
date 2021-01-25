@@ -1,4 +1,7 @@
 import json
+
+from nltk import PorterStemmer
+
 from word_polarity import word_polarity
 
 
@@ -9,10 +12,9 @@ def add_value(doc, key, value):
         return value
 
 
-def sentiment(sentence):
+def sentiment_sentence(sentence):
     sent_dict = dict()
     adverbs = []
-    wordlist = []
     with open("adverbsOfDegree.json", "r") as file:
         adverbs = json.load(file)
         file.close()
@@ -56,6 +58,7 @@ def sentiment(sentence):
                     # check negative words
                     if (child.dep_ == "neg"):
                         sentimentMeasure *= -1
+
                 # check nouns
                 for child in token.head.children:
                     noun = ""
@@ -65,5 +68,29 @@ def sentiment(sentence):
                             if subchild.dep_ == "compound":
                                 noun = subchild.text + " " + noun
                         sent_dict[noun] = add_value(sent_dict, noun, sentimentMeasure)
-        #print("\n")
     return sent_dict
+
+
+def sentiment_review(review):
+    ps = PorterStemmer()
+    sentiment_aspects = dict()
+    sentences = list()
+    with open("aspects.json", "r") as f:
+        aspects = json.load(f)
+        f.close()
+
+    stem_aspects = [ps.stem(aspect) for aspect in aspects]
+
+    for token in review:
+        if ps.stem(token.text) in stem_aspects:
+            for sentence in review.sents:
+                if token in sentence:
+                    if sentence not in sentences:
+                        sentences.append(sentence)
+                    break
+    for sentence in sentences:
+        features = sentiment_sentence(sentence)
+        for feature in features:
+            sentiment_aspects[feature] = add_value(sentiment_aspects, feature, features[feature])
+    return sentiment_aspects
+
