@@ -48,7 +48,7 @@ def main():
     print("size of model:", len(df['extract']))
 
     for i in range(len(df['extract'])):
-        print("Pointer =", i+1)
+        print(f"review[{i+1}] completed")
         doc = nlp(df['extract'][i])
         nouns = sentiment_review(doc)
         aspects = find_aspects(nouns)
@@ -70,8 +70,7 @@ def main():
     for aspect in negative_review:
         print(aspect, ": {0:.2f}%".format(abs(negative_review[aspect]) * 100 / total_rate))
     '''
-    chart(positive_review, total_rate, 1)
-    chart(negative_review, total_rate, -1)
+    chart(positive_review, negative_review)
     beautiful_spider(positive_review, negative_review)
 
 
